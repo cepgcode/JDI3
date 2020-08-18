@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta charset="utf-8" />
+	<title>子模块设计器</title>
+	<style type="text/css">
+		html,body,h1,h2,h3,h4,h5,h6,p,span,label,ol,ul,li,dl,dt,dd,div,form,pre {
+			margin: 0;
+			padding: 0;
+		}
+
+		#inputFile {
+			position: fixed;
+			top: 8.5px;
+			right: 60px;
+			z-index: 9999999;
+			padding: 0 5px;
+			height: 20px;
+			font-size: 14px;
+			line-height: 16px;
+		}
+
+		#apply {
+			position: fixed;
+			top: 8.5px;
+			right: 10px;
+			z-index: 9999999;
+			padding: 0 5px;
+			height: 20px;
+			font-size: 14px;
+			line-height: 16px;
+		}
+
+		#ephox_main .ephox-polish-editor-container,
+		#ephox_main .ephox-polish-source-container {
+			position: fixed;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+		}
+	</style>
+</head>
+
+<body>
+	<button id="inputFile">导入</button>
+	<button id="apply">应用</button>
+	<textarea id="main"></textarea>
+
+	<!-- <script type="text/javascript" src="../lib/jquery/dist/jquery.min.js"></script> -->
+	<script>
+		window.$ = window.jQuery = require("jquery");
+	</script>
+	<script type="text/javascript" src="../lib/textboxio-client/textboxio/textboxio.js"></script>
+	<script type="text/javascript" src="../js/editor.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,72 @@
+#workspace {
+    position: relative;
+    top:18px;
+    background-color: #fff;
+    cursor: crosshair;
+}
+#workspace_copy .workspace-node,   /* 12/24 添加 */
+#workspace .workspace-node {
+    opacity: 1;
+}
+
+.workspace-node {
+    position: absolute;
+    opacity: .5;
+    cursor: move;
+}
+
+#workspace.focus {
+    border: 2px solid red;
+}
+
+#workspace .focus {
+    background-color: red;
+}
+#workspace_copy .workspace-node[data-type="div"],   /* 12/24 添加 */
+#workspace .workspace-node[data-type="div"] {
+    border: 1px solid lightgray;
+}
+
+#workspace_copy [data-type=text],
+#workspace_copy [data-type=button],
+#workspace_copy [data-type=checkbox],
+#workspace_copy [data-type=img],
+#workspace_copy [data-type=div],    /* 12/24 添加 */
+#workspace [data-type=text],
+#workspace [data-type=button],
+#workspace [data-type=checkbox],
+#workspace [data-type=img],
+#workspace [data-type=div] {
+    font-family: 宋体, 微软雅黑, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+#workspace_copy [data-type=text],   /* 12/24 添加 */
+#workspace [data-type=text] {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+/* 弹框中元素框显示隐藏按钮 */
+.modal-content .display-flex{
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+}
+.modal-content .toggle-btn{
+ padding: 1px 8px; 
+ margin:1px 4px 0 0;
+}
+.control-size{
+    float: right;
+    width: 13px;
+    height: 13px;
+    margin-right: 6px;
+    cursor: pointer;
+}
+.control-img{
+    width: 100%;
+    height: 100%;
+    vertical-align: baseline;
+}

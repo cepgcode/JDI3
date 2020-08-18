@@ -1,0 +1,4 @@
+环境：安装node
+运行：命令：如果有dist文件夹直接npm run pack重新生成在dist文件夹，打开其中EXE文件
+	   如果没，运行npm run packnodist生成在dist文件夹，打开其中EXE文件
+	   36.33.216.13

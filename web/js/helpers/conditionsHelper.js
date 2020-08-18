@@ -323,6 +323,22 @@ var ConditionsHelper = (function () {
             name: "数字",
             value: "Number"
         }],
+        dateConfig: [{
+            name: '0',
+            value: 'original'
+        }, {
+            name: '+1',
+            value: 'add+1'
+        }, {
+            name: '-1',
+            value: 'subtract-1'
+        }, {
+            name: '+2',
+            value: 'add+2'
+        }, {
+            name: '-2',
+            value: 'subtract-2'
+        }],
         getOperators: getOperators
     };
 })();

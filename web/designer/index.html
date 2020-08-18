@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>JDI设计器</title>
+    <link rel="stylesheet" href="../lib/jquery-ui/jquery-ui.min.css">
+    <link rel="stylesheet" href="../lib/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/loader.css">
+    <link rel="stylesheet" href="../lib/buildTree/buildTree.css">
+    <link rel="stylesheet" href="../lib/orgChart/jquery.orgchart.css">
+
+    <!--导航栏-->
+    <nav class="navbar navbar-fixed-top">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="javascript:void()">JDI设计器</a>
+        </div>
+
+        <ul class="nav navbar-nav navbar-left">
+            <li class="dropdown">
+                <a class="item dropdown-toggle" data-toggle="dropdown">操作<b class="caret"></b></a>
+                <ul class="dropdown-menu"></ul>
+                <ul class="dropdown-menu">
+                </ul>
+            </li>
+            <!-- <li class="dropdown">
+                <a class="item dropdowm-toggle" data-toggle="dropdown">表单<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li><a data-toggle="modal" href="#create_template_modal">新建</a></li>
+                    <li class="divider"></li>
+                    <li><a data-toggle="modal" href="#open_template_modal">打开</a></li>
+                    <li><a data-toggle="modal" href="#template_config_modal">配置查询</a></li>
+                </ul>
+            </li> -->
+            <li class="dropdown">
+                <a class="item dropdowm-toggle" data-toggle="dropdown">布局<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li><a data-toggle="modal" href="#create_resource_modal">新建</a></li>
+                    <li class="divider"></li>
+                    <li><a data-toggle="modal" href="#open_resource_modal">打开</a></li>
+                    <li><a data-toggle="modal" href="#resource_config_modal">配置查询</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a class="item dropdown-toggle" data-toggle="dropdown">工具<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li><a id="openSetDB" href="#setDbDesignerModal" data-first-filter="db">数据库设计器</a></li>
+                    <li><a data-toggle="modal" href="#dbDesignerModal" data-first-filter="db">本表数据配置</a></li>
+                    <li><a data-toggle="modal" href="#dbApplyModal" data-first-filter="db">数据库应用</a></li>
+                    <li><a href="javascript:void(0)" id="globalExprMethods" data-first-filter="db">全局函数配置</a></li>
+                    <!-- <li><a data-toggle="modal" href="#change_category_moda">分类选项编辑</a></li> -->
+                    <li><a data-toggle="modal" href="#change_listen_modal">特殊布局编辑</a></li>
+                    <li><a data-toggle="modal" href="#change_tree_modal">分类树形编辑</a></li>
+                    <!-- <li><a data-toggle="modal" href="#change_router_modal">路由配置编辑</a></li>(zww入口暂时注释) -->
+                    <li><a data-toggle="modal" href="#change_global_modal" data-first-filter="db">变量配置</a></li>
+                    <li><a id="controlRuler">标尺查看器</a></li>
+                </ul>
+            </li>
+            <li><a class="item" id="saveAs" data-first-filter="save" data-toggle="modal"
+                    href="#saveAsModal">另存为...</a></a></li>
+            <li><a class="item" id="submit">保存</a></li>
+            <li><a class="item" id="changeID">修改页面信息</a></li>
+            <li><a class="item" id="delete" data-zero-filter="delete" style="display: none">删除</a></li>
+            <li><a class="item" id="recall" data-first-filter="recall" style="display: none">重新调用表单</a></li>
+            <li><a class="item" id="preview" data-zero-filter="preview" style="display: none" target="_blank">预览</a>
+            </li>
+            <li><a class="item" data-toggle="modal" href="#workspaceModal">工作区设置</a></li>
+            <li><a class="item" data-toggle="modal" href="#publishModal" data-first-filter="db">发布布局</a></li>
+        </ul>
+
+        <!-- <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+            <a class="item dropdown-toggle" data-toggle="dropdown"><%= user.userName %><b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="/users/logout">注销</a></li>
+                <li><a href="/users/revisepwd">密码</a></li>
+            </ul>
+        </li>
+    </ul> -->
+    </nav>
+
+    <!--主体区域-->
+    <article class="main"></article>
+
+    <!--正在加载-->
+    <section class="loader">
+        <div class="loader-content clearfix">
+            <p class="loader-text">正在加载中……</p>
+            <div class="loader-animate">
+                <i></i><i></i><i></i><i></i><i></i>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        window.$ = window.jQuery = require("jquery");
+    </script>
+    <script type="text/javascript" src="../lib/jquery-ui/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="../lib/jresizable/jresizable.css">
+    <link rel="stylesheet" href="../lib/jcontextmenu/jcontextmenu.css">
+    <link rel="stylesheet" href="../lib/jpagination/jpagination.css">
+    <link rel="stylesheet" href="../lib/jdi-numViewer/jdi-numViewer.css">
+    <link rel="stylesheet" href="../lib/jdi-exprGenerator/jdi-exprGenerator.css">
+    <link rel="stylesheet" href="../lib/jdi-dbDesigner/jdi-dbDesigner.css">
+    <link rel="stylesheet" href="../lib/jdi-dbQuerier/jdi-dbQuerier.css">
+    <link rel="stylesheet" href="../lib/jdi-Db/jdi-Db.css">
+    <link rel="stylesheet" href="../lib/jdi-propModifier/jdi-propModifier.css">
+    <link rel="stylesheet" href="../lib/datetimepicker/jquery.datetimepicker.css">
+    <link rel="stylesheet" href="../lib/chosen/chosen.min.css">
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/model.css">
+
+    <!--控件栏-->
+    <aside id="controlbar" data-zero-filter="asider" style="display: none">
+        <ul class="control-list">
+            <li class="control-item" data-type="text" title="文本框">
+                <span class="glyphicon glyphicon-subtitles"></span>
+                <span>文本框</span>
+            </li>
+            <li class="control-item" data-type="button" title="方按钮">
+                <span class="glyphicon glyphicon-unchecked"></span>
+                <span>方按钮</span>
+            </li>
+            <li class="control-item" data-type="circleBtn" title="圆按钮">
+                <span class="glyphicon glyphicon-record"></span>
+                <span>圆按钮</span>
+            </li>
+            <li class="control-item" data-type="dotBtn" title="点按钮">
+                <span class="glyphicon glyphicon-option-horizontal"></span>
+                <span>点按钮</span>
+            </li>
+            <li class="control-item" data-type="checkbox" title="复选框">
+                <span class="glyphicon glyphicon-check"></span>
+                <span>复选框</span>
+            </li>
+            <li class="control-item" data-type="img" title="图片域">
+                <span class="glyphicon glyphicon-picture"></span>
+                <span>图片域</span>
+            </li>
+            <li class="control-item" data-type="div" title="子模块设计">
+                <span class="glyphicon glyphicon-edit"></span>
+                <span>子模块设计</span>
+            </li>
+            <li class="arrow-wrap" title="箭头">
+                <img class="draw-item icon-arrow icon-right-arrow" src="../images/right-arrow.png" data-type="arrow"
+                    data-subtype="right-arrow">
+                <img class="draw-item icon-arrow icon-left-arrow" src="../images/right-arrow.png" data-type="arrow"
+                    data-subtype="left-arrow">
+                <img class="draw-item icon-arrow icon-up-arrow" src="../images/up-arrow.png" data-type="arrow"
+                    data-subtype="up-arrow">
+                <img class="draw-item icon-arrow icon-bottom-arrow" src="../images/up-arrow.png" data-type="arrow"
+                    data-subtype="bottom-arrow">
+            </li>
+            <li class="arrow-wrap" title="箭头">
+                <img class="draw-item icon-arrow icon-up-left-arrow" src="../images/up-left-arrow.png" data-type="arrow"
+                    data-subtype="up-left-arrow">
+                <img class="draw-item icon-arrow icon-bottom-right-arrow" src="../images/up-left-arrow.png"
+                    data-type="arrow" data-subtype="bottom-right-arrow">
+                <img class="draw-item icon-arrow icon-bottom-left-arrow" src="../images/bottom-left-arrow.png"
+                    data-type="arrow" data-subtype="bottom-left-arrow">
+                <img class="draw-item icon-arrow icon-up-right-arrow" src="../images/bottom-left-arrow.png"
+                    data-type="arrow" data-subtype="up-right-arrow">
+            </li>
+        </ul>
+    </aside>
+    <!--工具栏-->
+    <section id="toolbar" class="clearfix" data-zero-filter="asider">
+        <h4 id="name"></h4>
+        <div id="buttonbar">
+            <div class="btn-group btn-phone">
+                <button class="btn btn-default btn-sm" data-type="show-phone" title="手机页面设置">
+                    <span class="icon icon-phone"></span>
+                </button>
+            </div>
+            <!-- <div class="btn-group btn-views">
+                <button class="btn btn-default btn-sm" data-state="1" data-type="functionInsert" id="openInsertFnModal"
+                    title="插入函数">
+                    <span class="icon icon-fx"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-type="functionView" id="viewAllFns" title="查看函数配置">
+                    <span class="icon icon-fx-view"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-type="showSameCname" id="viewSameCname" title="查看相同中文名">
+                    <span class="icon icon-cname-view"></span>
+                </button>
+            </div> -->
+
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm" data-state="2" data-type="align-left" title="左对齐">
+                    <span class="icon icon-align-left"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-state="2" data-type="align-center" title="居中对齐">
+                    <span class="icon icon-align-center"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-state="2" data-type="align-right" title="右对齐">
+                    <span class="icon icon-align-right"></span>
+                </button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm" data-state="2" data-type="align-top" title="顶端对齐">
+                    <span class="icon icon-align-top"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-state="2" data-type="align-middle" title="中间对齐">
+                    <span class="icon icon-align-middle"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-state="2" data-type="align-bottom" title="底端对齐">
+                    <span class="icon icon-align-bottom"></span>
+                </button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm" data-state="2" data-type="equal-width" title="相同宽度">
+                    <span class="icon icon-equal-width"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-state="2" data-type="equal-height" title="相同高度">
+                    <span class="icon icon-equal-height"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-state="2" data-type="equal-all" title="相同宽高">
+                    <span class="icon icon-equal-all"></span>
+                </button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm" data-state="2" data-type="horizon-space" title="水平间距">
+                    <span class="icon icon-horizon-space"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-state="2" data-type="vertical-space" title="垂直间距">
+                    <span class="icon icon-vertical-space"></span>
+                </button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm" data-state="3" data-type="put-top" title="置顶">
+                    <span class="icon icon-put-top"></span>
+                </button>
+                <button class="btn btn-default btn-sm" data-state="3" data-type="put-bottom" title="置底">
+                    <span class="icon icon-put-bottom"></span>
+                </button>
+            </div>
+            <div class="btn-group dropdown">
+                <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">查看属性
+                    <!-- <button class="btn btn-default  btn-sm dropdown-toggle" data-toggle="dropdown"> -->
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right"">
+                    <li class=" dropdown-submenu">
+                    <a href="#">基本属性</a>
+                    <ul class="dropdown-menu">
+                        <li><a data-type="propertyViewer" data-viewer="id" data-type="span" data-change="false">编号</a>
+                        </li>
+                        <li><a data-type="showSameCname" data-viewer="cname" data-type="span" data-change="true">中文名</a>
+                        </li>
+                        <li><a data-type="propertyViewer" data-viewer="name" data-type="span" data-change="true">表单名</a>
+                        </li>
+                        <li><a data-type="propertyViewer" data-viewer="controlType" data-type="span"
+                                data-change="true">控件类型</a></li>
+                        <li><a data-type="propertyViewer" data-viewer="color" data-change="true">字体颜色</a></li>
+                        <li><a data-type="propertyViewer" data-viewer="visibility" data-type="checkbox"
+                                data-change="true">可见性</a></li>
+                        <li><a data-type="propertyViewer" data-viewer="disabled" data-type="checkbox"
+                                data-change="true">禁用</a></li>
+                        <li><a data-type="propertyViewer" data-viewer="readonly" data-type="checkbox"
+                                data-change="true">只读</a></li>
+                    </ul>
+                    </li>
+                    <li class=" dropdown-submenu">
+                        <a href="#">验证属性</a>
+                        <ul class="dropdown-menu">
+                            <li><a data-type="propertyViewer" data-viewer="validate.format" data-change="true">格式验证</a>
+                            </li>
+                            <li><a data-type="propertyViewer" data-viewer="validate.minLength"
+                                    data-change="true">最小字符串</a></li>
+                            <li><a data-type="propertyViewer" data-viewer="validate.maxLength"
+                                    data-change="true">最大字符串</a></li>
+                            <li><a data-type="propertyViewer" data-viewer="validate.remote" data-change="true">远程验证</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class=" dropdown-submenu">
+                        <a href="#">表达式属性</a>
+                        <ul class="dropdown-menu">
+                            <li><a data-type="propertyViewer" data-viewer="expression" data-change="true">表达式</a></li>
+                        </ul>
+                    </li>
+                    <li class=" dropdown-submenu">
+                        <a href="#">数据源属性</a>
+                        <ul class="dropdown-menu">
+                            <li><a data-type="propertyViewer" data-viewer="dataSource.static"
+                                    data-change="true">静态数据源</a></li>
+                            <li><a data-type="propertyViewer" data-viewer="dataSource.db" data-change="true">数据库数据源</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class=" dropdown-submenu">
+                        <a href="#">触发属性</a>
+                        <ul class="dropdown-menu">
+                            <li><a data-type="propertyViewer" data-viewer="events" data-change="true">触发</a></li>
+                        </ul>
+                    </li>
+                    <li class=" dropdown-submenu">
+                        <a href="#">查询属性</a>
+                        <ul class="dropdown-menu">
+                            <li><a data-type="propertyViewer" data-viewer="query.db" data-change="true">数据库查询</a></li>
+                            <li><a data-type="propertyViewer" data-viewer="archivePath" data-change="true">显示路径</a></li>
+                            <li><a data-type="propertyViewer" data-viewer="query.nest" data-change="true">嵌套查询</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="btn-group dropdown">
+                <button class="btn btn-default btn-sm dropdown-toggle" data-state="3" data-toggle="dropdown">移动至
+                    <!-- <button class="btn btn-default btn-sm dropdown-toggle" data-state="3" data-toggle="dropdown"> -->
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li><a data-type="left" data-state="3">左边</a></li>
+                    <li><a data-type="center" data-state="3">水平中线</a></li>
+                    <li><a data-type="right" data-state="3">右边</a></li>
+                    <li><a data-type="top" data-state="3">上边</a></li>
+                    <li><a data-type="middle" data-state="3">垂直中线</a></li>
+                    <li><a data-type="bottom" data-state="3">下边</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    <!--属性栏-->
+    <aside id="propertybar" data-zero-filter="asider" style="display: none"></aside>
+    <!--设计器-->
+    <section id="designer" data-zero-filter="asider">
+        <div id="ruler">
+            <div id="workspace"></div>
+        </div>
+        <div id="phone_warp">
+            <div id="phone">
+                <div id="phone_content"></div>
+                <div class="statusbar"></div>
+            </div>
+        </div>
+    </section>
+    <!-- 新建表单资源 -->
+    <section class="modal fade" id="create_template_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">新建表单</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="create_template_resource_tab">
+                            <form class="form-horizontal" id="template_resource_form">
+                                <!-- <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="template_resource_name">资源名称：</label>
+                                    <div class="col-lg-7">
+                                        <input class="form-control" id="template_resource_name" type="text"
+                                            name="template_resource_name">
+                                    </div>
+                                </div> -->
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="template_name">表单名称</label>
+                                    <div class="col-lg-7">
+                                        <input class="form-control" id="template_name" type="text" name="template_name">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="template_category">表单分类</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="template_category"
+                                            name="template_category"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="template_subCategory">表单子分类</label>
+                                    <div class="checkbox " id="template_subCategory"></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!-- 新建布局资源 -->
+    <section class="modal fade" id="create_resource_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">新建布局</h4>
+                </header>
+                <section class="modal-body">
+
+                    <div class="content">
+                        <!-- <div>
+                            <form class="form-horizontal" id="model_resource_form">
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="model_resource_subCategory">表单分类：</label>
+                                    <div class="col-lg-7">
+                                        <div class="checkbox" id="model_resource_subCategory"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="model_resource_relId">关联表单：</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="model_resource_relId"
+                                            name="model_resource_relId"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="model_resource_name">布局名称：</label>
+                                    <div class="col-lg-7">
+                                        <input class="form-control" id="model_resource_name" type="text"
+                                            name="model_resource_name">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="model_feature">特性:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="model_feature" name="model_feature"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="model_category">分类</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="model_category" name="model_category"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="model_area">区域</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="model_area" name="model_area"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="model_subCategory">子分类</label>
+                                    <div class="col-lg-7">
+                                        <input class="form-control" id="model_subCategory" type="text"
+                                            name="model_subCategory" readonly="readonly">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="model_subCategory">备用1</label>
+                                    <div class="col-lg-7">
+                                        <input class="form-control" id="model_spare1" type="text" name="model_spare1"
+                                            readonly="readonly">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="model_subCategory">备用2</label>
+                                    <div class="col-lg-7">
+                                        <input class="form-control" id="model_spare2" type="text" name="model_spare2"
+                                            readonly="readonly">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="model_userGrade">用户级别</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="model_userGrade"
+                                            name="model_userGrade"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-lg-3" for="model_autoCreate">自动分表</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="model_autoCreate"
+                                            name="model_autoCreate"></select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div> -->
+                        <div>
+                            <form class="form-horizontal" id="model_resource_form">
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="model_resource_subCategory">表单分类：</label>
+                                    <div class="col-lg-7">
+                                        <div class="checkbox" id="model_resource_subCategory"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" for="model_resource_name">布局名称：</label>
+                                    <div class="col-lg-7">
+                                        <input class="form-control" id="model_resource_name" type="text">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">表属性:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="modal_firstCategory"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">表序号:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="modal_secondCategory"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">布局属性:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="modal_thridCategory"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">一级目录:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="modal_fourthCategory"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">二级目录:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="modal_fifthCategory"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">布局区域:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="modal_sixthCategory"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">备用1:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="modal_seventhCategory"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">综合:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="modal_eighthCategory"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label">布局等级:</label>
+                                    <div class="col-lg-7">
+                                        <select class="form-control" id="modal_ninthCategory"></select>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!-- 打开表单资源 -->
+    <section class="modal fade" id="open_template_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">打开表单资源</h4>
+                </header>
+                <section class="modal-body">
+
+                    <div class="content">
+                        <div class="" id="open_template_resource_tab">
+                            <section id="template_resource_page"></section>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- 表单配置 -->
+    <section class="modal fade" id="template_config_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">配置表单查询项</h4>
+                </header>
+                <section class="modal-body"></section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">删除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+    <!-- 修改树形分类选项 -->
+    <section class="modal fade" id="change_tree_modal">
+        <div class="modal-dialog w600px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">树形分类</h4>
+                </header>
+                <div id="changeCategoryTree">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 打开布局资源 -->
+    <section class="modal fade" id="open_resource_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">打开布局资源</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="content">
+                        <div class="" id="open_model_resource_tab">
+                            <section id="model_resource_page"></section>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+    <!-- 配置布局查询项 -->
+    <section class="modal fade" id="resource_config_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">配置布局查询项</h4>
+                </header>
+                <section class="modal-body"></section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">删除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!-- 修改表单/布局保存分类选项 -->
+    <section class="modal fade" id="change_category_moda">
+        <div class="modal-dialog w600px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">分类选项编辑</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">修改项：</label>
+                            <div class="col-lg-9">
+                                <select data-name="selectName" class="form-control"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">当前值：<br><button
+                                    class="btn btn-default btn-sm add">新增</button></label>
+                            <div class="col-lg-9">
+                                <div class="row" data-name="setOption"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-default cancel">取消</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+    <!-- 修改监听对象的编号 -->
+    <section class="modal fade" id="change_listen_modal">
+        <div class="modal-dialog " style="width:1240px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">特殊布局设置</h4>
+                </header>
+                <section class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">关联代码</th>
+                                <th class="text-center">监听值</th>
+                                <th class="text-center">监听中文名</th>
+                                <th class="text-center">接受参数</th>
+                                <th class="text-center">参数值</th>
+                                <th class="text-center"><span class="add">+</span></th>
+
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-default cancel">取消</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!-- 修改路由配置 -->
+    <section class="modal fade" id="change_router_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">当前路由配置</h4>
+                </header>
+                <section class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>当前路由</th>
+                                <th>当前接口</th>
+                                <th>指向路由接口</th>
+                                <th><span class="add">+</span></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-default cancel">取消</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!-- 全局变量配置 -->
+    <section class="modal fade" id="change_global_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">变量配置</h4>
+                </header>
+                <section class="modal-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#gLobalVariable" data-toggle="tab" class="global">全局变量</a></li>
+                        <li><a href="#localVariable" data-toggle="tab">局部变量</a></li>
+                        <!-- <li><a href="#customizeVariable" data-toggle="tab">自定义变量</a></li> -->
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="gLobalVariable">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">属性值</th>
+                                        <th class="text-center">描述</th>
+                                        <th><span class="add globalAdd">+</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="localVariable">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">属性值</th>
+                                        <th class="text-center">描述</th>
+                                        <th><span class="add localadd">+</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <!-- <div class="tab-pane fade" id="customizeVariable">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">属性</th>
+                                        <th class="text-center">描述</th>
+                                        <th class="text-center">属性数据</th>
+                                        <th class="text-center">属性查询</th>
+                                        <th class="text-center">属性处理</th>
+                                        <th class="text-center">属性渲染</th>
+                                        <th><span class="add customizeadd">+</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div> -->
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-default cancel">取消</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!--接收产品模态框-->
+    <section class="modal fade" id="receive_product_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">接收产品</h4>
+                </header>
+                <section class="modal-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#receive_template_product_tab">表单产品</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="receive_template_product_tab">
+                            <div class="panel-group" id="template_accordion">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#template_accordion"
+                                                href="#first_template_accordion">未处理状态</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-collapse collapse in" id="first_template_accordion">
+                                        <div class="panel-body">
+                                            <table class="table table-striped table-hover table-responsive ltable">
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#template_accordion"
+                                                href="#second_template_accordion">处理中状态</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-collapse collapse" id="second_template_accordion">
+                                        <div class="panel-body">
+                                            <table class="table table-striped table-hover table-responsive ltable">
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="receive_model_product_tab">
+                            <div class="panel-group" id="model_accordion">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#model_accordion"
+                                                href="#first_model_accordion">未处理状态</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-collapse collapse in" id="first_model_accordion">
+                                        <div class="panel-body">
+                                            <table class="table table-striped table-hover table-responsive ltable">
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#model_accordion"
+                                                href="#second_model_accordion">处理中状态</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-collapse collapse" id="second_model_accordion">
+                                        <div class="panel-body">
+                                            <table class="table table-striped table-hover table-responsive ltable">
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!--打开产品模态框-->
+    <section class="modal fade" id="open_product_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">打开产品</h4>
+                </header>
+                <section class="modal-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#open_template_product_tab">表单产品</a></li>
+                        <li><a data-toggle="tab" href="#open_model_product_tab">布局产品</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="open_template_product_tab">
+                            <section id="template_product_page"></section>
+                        </div>
+                        <div class="tab-pane fade" id="open_model_product_tab">
+                            <section id="model_product_page"></section>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!--静态数据源模态框-->
+    <section class="modal fade" id="dataSource_static_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">静态数据源配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label">数据项</label>
+                        <textarea class="form-control" cols="30" rows="10"
+                            placeholder="item以换行符[\r\n]、分号[;；]隔开，name、value以逗号[,，]隔开"></textarea>
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">清除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!--数据库数据源模态框-->
+    <section class="modal fade" id="dataSource_db_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">数据库数据源配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="querier"></div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">清除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <section class="modal fade" id="events_modal">
+        <section class="modal-dialog w1800px" style="overflow:hidden">
+            <section class="modal-content">
+
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <div class="control-size" data-size="reductionSize">
+                        <img class="control-img" src="../images/reductionSize.png" />
+                    </div>
+                    <h4>触发配置</h4>
+                </header>
+                <div class="display-flex">
+                    <div>切换显示:<input type="checkbox" class="changeView" class="form-control"></div>
+                    <button class="btn btn-info toggle-btn">隐藏</button>
+                </div>
+                <div class="box-content" style="width: 1799px;height: 365px;">
+                    <div class="clickbox">
+                        <section class="clickModal pm3"></section>
+                    </div>
+                    <div class="box">
+                    </div>
+
+                </div>
+                <section class="modal-body" style="overflow: scroll; max-height: 500px">
+                    <!-- <table class="table table-bordered table-striped table-hover table-responsive ctable"> -->
+                    <table style="width:2450px"
+                        class="moveTable table table-bordered table-striped table-hover table-responsive ctable">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 30px">
+                                    <span class="add" data-add="renderEvents" style="padding:0px">＋</span>
+                                </th>
+                                <th class="text-center" style="width:90px">触发类型</th>
+                                <th class="text-center" style="width: 530px">触发条件</th>
+                                <th class="text-center" style="width:90px">方法</th>
+                                <th class="text-center condition">配置信息</th>
+
+                            </tr>
+
+                        </thead>
+                        <tbody class="events_tbbody">
+
+                        </tbody>
+                    </table>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">清除</button>
+                </footer>
+            </section>
+        </section>
+    </section>
+
+    <section class="modal fade" id="eventGuide_modal">
+    </section>
+
+    <!-- 数据源tab选项卡 -->
+    <section class="modal fade" id="dataSource_db_tab_modal">
+        <div class="modal-dialog w640px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">下拉列表数据源</h4>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#dataSource_static_tab" data-toggle="tab">静态数据源</a>
+                        </li>
+                        <li>
+                            <a href="#dataSource_db_tab" data-toggle="tab">数据库数据源</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="dataSource_static_tab">
+                            <div class="form-group">
+                                <label class="control-label">数据项</label>
+                                <textarea class="form-control" cols="30" rows="6"
+                                    placeholder="item以换行符[\r\n]、分号[;；]隔开，name、value以逗号[,，]隔开"></textarea>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="dataSource_db_tab">
+                            <div class="querier_tab"></div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">清除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!--数据库查询模态框-->
+    <section class="modal fade" id="query_db_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">数据库查询配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">触发类型</label>
+                            <div class="col-lg-9">
+                                <select class="form-control" data-key="triggerType">
+                                    <option value="">请选择触发类型</option>
+                                    <option value="click">单击</option>
+                                    <option value="dblclick">双击</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">查询类型：</label>
+                            <div class="col-lg-9">
+                                <select class="form-control" data-key="type">
+                                    <option value="">请选择类型</option>
+                                    <option value="common">通用</option>
+                                    <option value="table">表格</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="querier"></div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">删除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+    <section class="modal fade" id="deleteDb_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">数据库删除配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="querier form-horizontal"></div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">删除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!-- 嵌套查询模态框 -->
+    <section class="modal fade" id="query_nest_modal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">数据库嵌套查询配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="nest-query-related form-horizontal">
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">关联元素编号：</label>
+                            <div class="col-lg-9">
+                                <select class="form-control" data-name="query_related"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">关联查询字段：</label>
+                            <div class="col-lg-9 query_related_fields"></div>
+                        </div>
+                    </div>
+                    <div class="nest-query-content"></div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">删除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!--存档路径模态框-->
+    <section class="modal fade" id="archivePath_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">查询结果显示路径配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label">查询类型：</label>
+                        <select class="form-control" data-key="type" data-type="Int">
+                            <option value="">请选择查询类型</option>
+                            <option value="0">通用查询</option>
+                            <option value="1">表格查询</option>
+                            <option value="2">详情链接</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">查询数据库：</label>
+                        <select class="form-control" data-key="dbName" data-type="String"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">查询表格：</label>
+                        <select class="form-control" data-key="table" data-type="String"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">查询字段：</label>
+                        <select class="form-control" data-key="field" data-type="String"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">表单编号：</label>
+                        <select class="form-control" data-key="modelId" data-type="String"></select>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <label class="control-label">字段分割符：</label>
+                                <input type="text" class="form-control" data-key="fieldSplit" data-type="String"
+                                    value=")">
+                            </div>
+                            <div class="col-lg-6">
+                                <label class="control-label">字段选取位置(从0开始)：</label>
+                                <input type="text" class="form-control" data-key="fieldIndex" data-type="String">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">重复字段（根据查询字段的值，重复渲染，并将值设为1）：</label>
+                        <input type="checkbox" data-key="repeat" data-type="Boolean" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">自增字段（根据重复字段查询的值，生成自增序号）：</label>
+                        <input type="checkbox" data-key="increase" data-type="Boolean" />
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">清除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!-- 新存档路径模态框 -->
+    <section class="modal fade" id="archivePathBatch_modal">
+        <div class="modal-dialog w1200px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">查询结果显示路径配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="archive-title">
+                        <div class="meta">查询数据库：<span class="meta-content" data-type="dbname"></span></div>
+                        <div class="meta">查询表：<span class="meta-content" data-type="tablename"></span></div>
+                        <div class="meta">查询类型：<span class="meta-content" data-type="querytype"></span></div>
+                        <span class="meta auto-match">字段匹配（寻找相同字段）</span>
+                    </div>
+                    <div class="archive_content">
+                        <div class="archive-left">
+                            <!-- <p class="meta">查询字段：</p>
+                                <div class="archive-left-content"></div> -->
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>查询字段</th>
+                                        <th>存放元素（页面元素）</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <ul class="archive-right">
+                            <p class="meta">页面元素：</p>
+                            <div class="archive-right-content"></div>
+                        </ul>
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">清除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!--数据库定义模态框-->
+    <section class="modal fade" id="dbDefineModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">数据库定义</h4>
+                </header>
+                <section class="modal-body">
+                    <table class="table table-striped table-hover table-responsive ltable"></table>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!--发布布局模态框-->
+    <section class="modal fade" id="publishModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">发布布局</h4>
+                </header>
+                <section class="modal-body">
+                    <table class="table table-striped table-hover table-responsive ltable">
+                        <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>状态</th>
+                                <th class="text-center">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!--工作区设置模态框-->
+    <section class="modal fade" id="workspaceModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">工作区设置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label" for="width">宽度</label>
+                        <input class="form-control" id="width" type="text" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="height">高度</label>
+                        <input class="form-control" id="height" type="text" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="bgColor">背景颜色</label>
+                        <input class="form-control" id="bgColor" type="color" value="#f2f2f2">
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!--数据入库模态框-->
+    <section class="modal fade" id="dbDesignerModal">
+        <div class="modal-dialog " style="width: 1400px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">数据入库</h4>
+                </header>
+                <section class="modal-body">
+                    <!-- 配置主键信息 -->
+                    <div id="keyInfo">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">库</th>
+                                    <th class="text-center">表</th>
+                                    <th class="text-center">主键</th>
+                                    <th class="text-center">值</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div id="dbDesigner"></div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+    <!-- 数据库应用 -->
+    <section class="modal fade" id="dbApplyModal">
+        <div class="modal-dialog w1200px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">数据库应用</h4>
+                </header>
+                <section class="modal-body">
+                    <form class="form-inline">
+                        <div class="form-group" style="margin-bottom: 5px">
+                            <label class="fromlable">数据库名</label>
+                            <input class="form-control" type="text" data-type="dbName">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 5px">
+                            <label class="fromlable">表名</label>
+                            <input class="form-control " type="text" disabled="true" data-type="tableName">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 5px">
+                            <label class="fromlable">表描述</label>
+                            <input class="form-control " type="text" data-type="description">
+                        </div>
+                        <div class="form-group" style="margin-bottom:5px;">
+                            <label class="fromlable">目录表</label>
+                            <select class="form-control " data-type="databaseList" style="width: 196px;">
+                                <option value="">请选择外库目录表</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:5px;">
+                            <label class="fromlable">映射库</label>
+                            <select class="form-control " data-type="databaseName" style="width: 196px;">
+                                <option value="">请选择数据库</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:5px;">
+                            <label class="fromlable">映射表</label>
+                            <select class="form-control " data-type="databaseTableName" style="width: 196px;">
+                                <option value="">请选择数据表</option>
+                            </select>
+                        </div>
+                        <!-- <div class="form-group" style="margin-bottom: 5px">
+                            <label class="fromlable">IP地址</label>
+                            <input class="form-control" type="text" data-type="IPArea">
+                        </div>
+                      
+                        <div class="form-group" style="margin-bottom: 5px">
+                            <label class="fromlable">映射表名</label>
+                            <input class="form-control" type="text" data-type="mapTableName">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 5px">
+                            <label class="fromlable">端口</label>
+                            <input class="form-control " type="text" data-type="port">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 5px">
+                            <label class="fromlable">用户名</label>
+                            <input class="form-control " type="text" data-type="userName">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 5px">
+                            <label class="fromlable">密码</label>
+                            <input class="form-control " type="text" data-type="passWord">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 5px">
+                            <label class="fromlable">库类型</label>
+                            <input class="form-control " type="text" data-type="dbType">
+                        </div> -->
+                        <!-- <button class="btn queryDb btn-sm" style="float: right;">查询</button>         -->
+                    </form>
+                    <div>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>数据库字段</th>
+                                    <th>类型</th>
+                                    <th>字段长度</th>
+                                    <th>中文名</th>
+                                    <th>对应编号</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dbApply">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+    <!--数据库设计模态框-->
+    <section class="modal fade" id="setDbDesignerModal">
+        <div class="modal-dialog w1200px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">数据库设计器</h4>
+                </header>
+                <section>
+
+                </section>
+                <section class="modal-body">
+                    <form class="form-inline">
+                        <div class="form-group col-lg-3" style="margin-bottom: 5px">
+                            <label class="control-label col-lg-3">数据库名</label>
+                            <!-- <select class="form-control col-lg-3" style="width: 194px" data-type="dbName"></select> -->
+                            <input class="col-lg-3 form-control" list="setDbDbName" data-type="dbName">
+                            <datalist id="setDbDbName">
+
+                            </datalist>
+                        </div>
+                        <div class="form-group col-lg-3" style="margin-bottom: 5px">
+                            <label class="control-label col-lg-3">表名</label>
+                            <input class="form-control col-lg-3" type="text" disabled data-type="tableName">
+                        </div>
+                        <div class="form-group col-lg-3" style="margin-bottom: 5px">
+                            <label class="control-label col-lg-3">表注解</label>
+                            <input class="form-control col-lg-3" type="text" data-type="tableDesc">
+                        </div>
+                        <div class="form-group col-lg-3" style="margin-bottom: 5px">
+                            <label class="control-label col-lg-3">数据库信息</label>
+                            <input class="form-control  col-lg-3" type="text" disabled data-type="reserveOne">
+                        </div>
+                        <div class="form-group col-lg-3" style="margin-bottom: 5px">
+                            <label class="control-label col-lg-3">备用2</label>
+                            <input class="form-control  col-lg-3" type="text" data-type="reserveTwo">
+                        </div>
+                        <div class="form-group col-lg-3" style="margin-bottom: 5px">
+                            <label class="control-label col-lg-3">备用3</label>
+                            <input class="form-control  col-lg-3" type="text" data-type="reserveThere">
+                        </div>
+                        <div class="form-group col-lg-3" style="margin-bottom: 5px">
+                            <label class="control-label col-lg-3">备用4</label>
+                            <input class="form-control  col-lg-3" type="text" data-type="reserveFour">
+                        </div>
+                        <div class="form-group col-lg-3" style="margin-bottom: 5px">
+                            <label class="control-label col-lg-3">备用5</label>
+                            <input class="form-control  col-lg-3" type="text" data-type=reserveFive>
+                        </div>
+                    </form>
+                    <div id="setDbDesigner"></div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!--产品记录查看器模态框-->
+    <section class="modal fade" id="recordModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">产品记录查看器</h4>
+                </header>
+                <section class="modal-body">
+                    <table class="table table-striped table-hover table-responsive ltable">
+                        <thead>
+                            <tr>
+                                <th>元素编号</th>
+                                <th>中文名</th>
+                                <th>表单产品</th>
+                                <th>布局产品审核</th>
+                                <th>布局产品定义</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!--提交模态框-->
+    <section class="modal fade" id="changeId">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">修改信息</h4>
+                </header>
+                <section class="modal-body">
+                    <ul class="nav nav-tabs">
+                        <li><a data-toggle="tab" href="#submit_template_tab">表单</a></li>
+                        <li><a data-toggle="tab" href="#submit_model_tab">布局</a></li>
+                    </ul>
+                    <!-- <ul class="list-group">
+                        <li class="list-group-item">名称：<span id="resource_name"></span></li>
+                        <li class="list-group-item">描述：<span id="resource_desc"></span></li>
+                    </ul> -->
+                    <div class="tab-content">
+                        <div class="tab-pane fade" id="submit_template_tab">
+                            <div class="form-group">
+                                <label class="control-label" for="Changetemplate_name">表单名称</label>
+                                <input class="form-control" id="Changetemplate_name" type="text" name="template_name">
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changetemplate_category">表单分类</label>
+                                <select class="form-control" id="Changetemplate_category"
+                                    name="template_category"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changetemplate_subCategory">表单子分类</label>
+                                <div class="checkbox" id="Changetemplate_subCategory" name="template_subCategory"></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="submit_model_tab">
+                            <div class="form-group">
+                                <label class="control-label">表单分类：</label>
+                                <div class="checkbox" id="Changemodel_subCategory"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changemodel_name">布局名称:</label>
+                                <input class="form-control" id="Changemodel_name" type="text" name="model_name">
+                            </div>
+                            <div>
+                                <label class="control-label">表属性:</label>
+                                <select class="form-control" id="Changemodel_firstCategory"></select>
+                            </div>
+                            <div>
+                                <label class="control-label">表序号:</label>
+                                <select class="form-control" id="Changemodel_secondeCategory"></select>
+                            </div>
+                            <div>
+                                <label class="control-label">布局属性:</label>
+                                <select class="form-control" id="Changemodel_thridCategory"></select>
+                            </div>
+                            <div>
+                                <label class="control-label">一级目录:</label>
+                                <select class="form-control" id="Changemodel_fourthCategory"></select>
+                            </div>
+                            <div>
+                                <label class="control-label">二级目录:</label>
+                                <select class="form-control" id="Changemodel_fifthCategory"></select>
+                            </div>
+                            <div>
+                                <label class="control-label">布局区域:</label>
+                                <select class="form-control" id="Changemodel_sixthCategory"></select>
+                            </div>
+                            <div>
+                                <label class="control-label">备用1:</label>
+                                <select class="form-control" id="Changemodel_seventhCategory"></select>
+                            </div>
+                            <div>
+                                <label class="control-label">综合:</label>
+                                <select class="form-control" id="Changemodel_eighthCategory"></select>
+                            </div>
+                            <div>
+                                <label class="control-label">布局等级:</label>
+                                <select class="form-control" id="Changemodel_ninthCategory"></select>
+                            </div>
+                            <!-- <div class="form-group">
+                                <label class="control-label" for="Changemodel_feature">一级目录</label>
+                                <select class="form-control" id="Changemodel_feature" name="model_feature"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changemodel_category">分类</label>
+                                <select class="form-control" id="Changemodel_category" name="model_category"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changemodel_area">区域</label>
+                                <select class="form-control" id="Changemodel_area" name="model_area"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changemodel_subCategory">子分类</label>
+                                <input class="form-control" id="Changemodel_subCategory" type="text"
+                                    name="model_subCategory" readonly="readonly">
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changemodel_spare1">备用1</label>
+                                <input class="form-control" id="Changemodel_spare1" type="text" name="model_spare1"
+                                    readonly="readonly">
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changemodel_spare2">备用2</label>
+                                <input class="form-control" id="Changemodel_spare2" type="text" name="model_spare2"
+                                    readonly="readonly">
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changemodel_userGrade">用户级别</label>
+                                <select class="form-control" id="Changemodel_userGrade" name="model_userGrade"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="Changemodel_autoCreate">自动分表</label>
+                                <select class="form-control" id="Changemodel_autoCreate"
+                                    name="model_autoCreate"></select>
+                            </div> -->
+                        </div>
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <section class="modal fade" id="copySendModal">
+        <div class="modal-dialog w1300px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">抄送配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="pannel copySendTop">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" href="#copySendPanel">库表选择器</a>
+                                <button class="btn btn-default btn-sm btn-collapse">
+                                    <i class="glyphicon glyphicon-chevron-up"></i></button>
+                            </h4>
+                        </div>
+                        <div id="copySendPanel" class="panel-collapse collapse">
+                            <div class="form-inline">
+                                <div class="form-group">
+                                    <label>数据库选择</label>
+                                    <select class="form-control" data-key="dbName"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>表选择</label>
+                                    <select class="form-control" data-key="tableName"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>抄送条件</label>
+                                    <label for=""></label>
+                                    <button class="btn btn-default btn-sm btn-conditions">...</button>
+                                    <input class="form-control" data-key="conditions" type="text">
+                                </div>
+                                <div class="form-group">
+                                    <label>抄送值</label>
+                                    <button class="btn btn-default btn-sm btn-value">...</button>
+                                    <input class="form-control" data-key="value" type="text">
+                                </div>
+                                <button class="btn btn-default btn-sm btn-search">查询</button>
+                                <button class="btn btn-primary btn-sm btn-add">保存</button>
+                            </div>
+                            <div class="copySendTopSelect">
+                                <table class="table table-bordered table-striped table-hover table-responsive ctable">
+                                    <thead>
+                                        <th>抄送元素</th>
+                                        <th>抄送列</th>
+                                        <th>抄送字段</th>
+                                        <th>删除</th>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="copySendBottom">
+                        <table class="table table-bordered table-striped table-hover table-responsive ctable">
+                            <thead>
+                                <tr>
+                                    <th>抄送属性</th>
+                                    <th>抄送数据库</th>
+                                    <th>抄送表</th>
+                                    <th>抄送行</th>
+                                    <th>抄送值</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">清除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!--条件模态框-->
+    <section class="modal fade" id="conditionsModal">
+        <div class="modal-dialog w800px">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">条件配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="conditions"></div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">清除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+    <!--抄送值模态框-->
+    <section class="modal fade" id="copyValueModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">抄送值配置</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="form-group">
+                        <label class="control-label">数据类型</label>
+                        <select class="form-control" data-key="type"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">运算符</label>
+                        <select class="form-control" data-key="operator"></select>
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">保存</button>
+                    <button class="btn btn-danger clear">清除</button>
+                </footer>
+            </div>
+        </div>
+    </section>
+
+
+    <!--图片上传表单-->
+    <form id="imgForm" style="display: none">
+        <input id="imgFile" type="file" name="imgFile">
+    </form>
+
+    <!-- 插入函数模态框 -->
+    <section id="insertFunctionModal">
+        <div class="noMask-modal">
+            <header class="modal-header">
+                <button class="close">&times;</button>
+                <h4 class="modal-title">插入函数</h4>
+            </header>
+            <section class="modal-body">
+                <div class="form-group">
+                    <label class="control-label">本地函数<input type="radio" data-type="local" name="functionType"></label>
+                    <label class="control-label">远程函数<input type="radio" data-type="remote" name="functionType"></label>
+                    <span class="custom-insertFn">自定义</span>
+                    <select class="form-control insert-fns-select"></select>
+                </div>
+                <div class="insert-fns-wrap">
+                    <div>选择函数：</div>
+                    <div class="insert-fns">
+                    </div>
+                </div>
+                <div class="insert-fn-desc"></div>
+            </section>
+            <footer class="modal-footer">
+                <button class="btn btn-primary save">确定</button>
+                <button class="btn btn-danger clear">取消</button>
+            </footer>
+        </div>
+    </section>
+
+    <!-- 函数参数模态框 -->
+    <section id="insertFunctionArgsModal">
+        <div class="noMask-modal">
+            <header class="modal-header">
+                <button class="close">&times;</button>
+                <h4 class="modal-title">函数参数</h4>
+            </header>
+            <section class="modal-body">
+                <div class="function-args form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">VALUE</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control">
+                            <!-- <span class="simplify">简化</span> -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-footer">
+                <button class="btn btn-primary save">确定</button>
+                <button class="btn btn-danger clear">取消</button>
+            </footer>
+        </div>
+    </section>
+    <!-- 另存为模态框 -->
+    <section class="modal fade" id="saveAsModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="close">&times;</button>
+                    <h4 class="modal-title">另存为</h4>
+                </header>
+                <section class="modal-body">
+                    <div class="function-args form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">另存名</label>
+                            <div class="col-sm-8">
+                                <input type="text" disabled class="form-control" data-key="name">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">是否最后流程</label>
+                            <div class="col-sm-1">
+                                <input type="checkbox" class="form-control" data-key="isFinalName">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <footer class="modal-footer">
+                    <button class="btn btn-primary save">确定</button>
+                </footer>
+            </div>
+        </div>
+
+    </section>
+
+    <script src="../js/upgrade.js"></script>
+    <script src="../js/init.js"></script>
+    </body>

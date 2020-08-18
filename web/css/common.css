@@ -1,0 +1,62 @@
+.mrg-l15px {
+    margin-left: 15px;
+}
+
+.pdg-t15px {
+    padding-top: 15px;
+}
+
+.pdg-tb10px {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.pdg-t30px {
+    padding-top: 25px;
+}
+
+.w100 {
+    width: 100%;
+}
+
+.w640px {
+    width: 640px;
+}
+
+.w800px {
+    width: 800px;
+}
+
+.w1000px {
+    width: 1000px;
+}
+
+.w1200px {
+    width: 1200px;
+}
+
+.w1300px {
+    width: 1300px;
+}
+
+.w1800px {
+    width: 1800px;
+}
+
+input[data-type="circleBtn"] {
+    width: 15px;
+    height: 15px;
+    padding: 0;
+    border: 5px solid red;
+    background-color: white;
+    border-radius: 100%;
+}
+
+input[data-type="dotBtn"] {
+    width: 5px;
+    height: 5px;
+    padding: 0;
+    border: none;
+    background-color: red;
+    border-radius: 100%;
+}

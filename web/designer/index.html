@@ -932,6 +932,7 @@
     </section>
 
     <!--数据库数据源模态框-->
+
     <section class="modal fade" id="dataSource_db_modal">
         <div class="modal-dialog w800px">
             <div class="modal-content">
@@ -949,11 +950,10 @@
             </div>
         </div>
     </section>
-
+    <!-- 触发属性模态框 -->
     <section class="modal fade" id="events_modal">
         <section class="modal-dialog w1800px" style="overflow:hidden">
             <section class="modal-content">
-
                 <header class="modal-header">
                     <button class="close" data-dismiss="modal">&times;</button>
                     <div class="control-size" data-size="reductionSize">
@@ -971,11 +971,9 @@
                     </div>
                     <div class="box">
                     </div>
-
                 </div>
                 <section class="modal-body" style="overflow: scroll; max-height: 500px">
-                    <!-- <table class="table table-bordered table-striped table-hover table-responsive ctable"> -->
-                    <table style="width:2450px"
+                    <table style="width:3950px"
                         class="moveTable table table-bordered table-striped table-hover table-responsive ctable">
                         <thead>
                             <tr>
@@ -983,15 +981,14 @@
                                     <span class="add" data-add="renderEvents" style="padding:0px">＋</span>
                                 </th>
                                 <th class="text-center" style="width:90px">触发类型</th>
-                                <th class="text-center" style="width: 530px">触发条件</th>
+                                <th class="text-center" style="width:30px">触发条件
+                                    <p class="toggle-dot active" data-name="condition"></p>
+                                </th>
                                 <th class="text-center" style="width:90px">方法</th>
                                 <th class="text-center condition">配置信息</th>
-
                             </tr>
-
                         </thead>
                         <tbody class="events_tbbody">
-
                         </tbody>
                     </table>
                 </section>
@@ -1853,6 +1850,5 @@
 
     </section>
 
-    <script src="../js/upgrade.js"></script>
     <script src="../js/init.js"></script>
     </body>

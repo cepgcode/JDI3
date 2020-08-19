@@ -196,14 +196,14 @@ Service.prototype = {
                 dataType: "json",
                 success: rst => {
                     var failedMsg = "操作失败!\n消息";
-                    if(DataType.isObject(rst)){
+                    if (DataType.isObject(rst)) {
                         var data = rst.errmsg;
-                        if(rst.errno === 0){
+                        if (rst.errno === 0) {
                             resolve(rst)
-                        }else{
+                        } else {
                             alert(failedMsg + JSON.stringify(data, null, 2));
                         }
-                    }else{
+                    } else {
                         alert(failedMsg + "服务器数据获取异常！")
                         reject("服务器数据获取异常！");
                     }

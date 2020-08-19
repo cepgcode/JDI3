@@ -123,6 +123,7 @@ function NewEventsModal($modal, $elemts) {
                         ${new newEventsProperty().renderExtendCol(event.subscribe.extendCol)}
                         ${new newEventsProperty().propertyRender(event.subscribe.propertyRender)}
                         ${new newEventsProperty().computerPageRender(event.subscribe.computerPage)}
+                        ${new newEventsProperty().renderCacheDatabase(event.subscribe.cacheDatabase)}
                         ${ that.renderSaveHTML(event.subscribe.saveHTML)}
                         ${ that.renderKeySave(event.subscribe.keySave)}
                         ${ that.renderNextProcess(event.subscribe.nextProcess)}
@@ -136,7 +137,6 @@ function NewEventsModal($modal, $elemts) {
                         ${ that.renderImportDb(event.subscribe.importDb)}
                         </td>
                         </tr>`;
-        // ${ that.renderExtendCol(event.subscribe.extendCol)}
         return str;
     }
 
@@ -412,6 +412,7 @@ function NewEventsModal($modal, $elemts) {
         if (subscribe.propertyHandle) checkArr.push("propertyHandle");
         if (subscribe.propertyRender) checkArr.push("propertyRender");
         if (subscribe.extendCol) checkArr.push("extendCol"); //zww
+        if (subscribe.cacheDatabase) checkArr.push("cacheDatabase"); //zww
 
         subscribe.query && subscribe.query.forEach(item => {
             checkArr.push(item)
@@ -445,7 +446,7 @@ function NewEventsModal($modal, $elemts) {
     }
     this.renderTriggerConditionTable = function (conditions = []) {
         let that = this,
-            str = `<table class="table table-bordered triggerCondition">
+            str = `<table class="table table-bordered triggerCondition" style="display:none">
                     <thead>
                         <tr>
                             <th class="text-center">左值类型</th>
@@ -681,13 +682,30 @@ function NewEventsModal($modal, $elemts) {
         })
         return `${str}</select>`
     }
-    this.renderCopySendSelect = function (type, dbName, table, field, defalutOption, selected) {
+    this.renderCopySendSelect = function (type, dbName, table, field, defalutOption, selected, queryData) {
         let that = this,
-            data = that.getCopySendSelectData(type, dbName, table, field),
+            data = [],
+            // data = that.getCopySendSelectData(type, dbName, table, field),
             str = `<select class="form-control chosen" data-save="${type}" data-change="${type}"><option value="">${defalutOption}</option>`;
+        if (type === "table") {
+            dbName ? data = that.getCopySendSelectData(type, dbName, table, field) : data = queryData || [];
+        } else {
+            dbName && table ? data = that.getCopySendSelectData(type, dbName, table, field) : data = queryData || [];
+        }
 
         data.forEach(item => {
-            str += `<option value="${item.value}" ${selected == item.value ? "selected" : ""}>${item.name}(${item.value})</option>`
+            str += `<option value="${item.value}" ${selected == item.value ? "selected" : ""}>${item.name}${item.value.includes("'") ? "" : "(" + item.value + ")"}</option>`
+            // str += `<option value="${item.value}" ${selected == item.value ? "selected" : ""}>${item.name}(${item.value})</option>`
+        })
+        return str;
+    }
+    this.renderQuerySelect = function (type, data, defalutOption, selected) {
+        if (!Array.isArray(data)) data = [];
+        let str = `<select class="form-control chosen" data-save="${type}" data-change="${type}"><option value="">${defalutOption}</option>`;
+        data.forEach(item => {
+            item.forEach(itemVal => {
+                str += `<option  data-text="${itemVal.name}" value="${itemVal.name}" ${selected == itemVal.name ? "selected" : ""}>${itemVal.name}</option>`
+            })
         })
         return str;
     }
@@ -1080,6 +1098,7 @@ NewEventsModal.prototype = {
         } catch (error) {
             alert("获取文件配置失败")
         }
+        // $(".toggle-dot[data-name='condition']").removeClass('active');
         that.getQueryMethods(id)
         that.getExprMethods()
         $(this).propModifier3({
@@ -1094,6 +1113,14 @@ NewEventsModal.prototype = {
             str += that.renderEvents(event, index)
         })
         that.$eventTbody.append(str);
+
+        if ($(".toggle-dot[data-name='condition']").hasClass('active')) {
+            var dotPrevLen = $(".toggle-dot[data-name='condition']").parent().prevAll().length;
+            $(".toggle-dot[data-name='condition']").parents("table").eq(0).children("tbody").children("tr").each((idx, tr) => {
+                $(tr).children("td").eq(dotPrevLen).css('width', '4%').children().hide();
+            })
+        }
+
         that.judgeCheck(); //判断是否选中
         that.bindChosen();
         // $(".moveTable").colResizable({
@@ -1187,7 +1214,8 @@ NewEventsModal.prototype = {
                 propertyRender = null,
                 computerPage = null,
                 importDb = null,
-                extendCol = null; //zww;
+                extendCol = null, //zww;
+                cacheDatabase = null;
             if (that.judgeCheckMehods("propertyData", $(this).find(".triggerMethods:checked"))) {
                 // propertyData = that.getPropertyData($(this).find('.propertyDataTr'), id, index)
                 propertyData = new newEventsProperty().getPropertyData($(this).find('.propertyDataTr'), id, index)
@@ -1197,6 +1225,9 @@ NewEventsModal.prototype = {
             }
             if (that.judgeCheckMehods("computerPage", $(this).find(".triggerMethods:checked"))) {
                 computerPage = new newEventsProperty().getComputerPage($(this).find('.computerPageTr'))
+            }
+            if (that.judgeCheckMehods("cacheDatabase", $(this).find(".triggerMethods:checked"))) {
+                cacheDatabase = new newEventsProperty().getCacheDatabase($(this).find('.cacheDatabaseTr'), id, index)
             }
             if (that.judgeCheckMehods("propertyHandle", $(this).find(".triggerMethods:checked"))) {
                 propertyHandle = new newEventsProperty().getPropertyHandle($(this).find(".propertyHandleTbody"), id, index)
@@ -1305,7 +1336,8 @@ NewEventsModal.prototype = {
                         propertyHandle: propertyHandle,
                         propertyRender: propertyRender,
                         extendCol: extendCol, //zww
-                        computerPage: computerPage
+                        computerPage: computerPage,
+                        cacheDatabase: cacheDatabase
                     }
                 })
             }
@@ -1327,26 +1359,67 @@ NewEventsModal.prototype = {
         that.$modal.on("click" + that.NAME_SPACE, ".add", function () {
             let addType = $(this).attr("data-add"),
                 $tbody = $(this).parents("table").eq(0).find("tbody").eq(0),
+                dbName = '',
+                table = '',
                 str = "";
             if (addType == "renderCopySendCondition" || addType == "renderCopySendConfig") {
-                let dbName = $(this).parents("tr").eq(1).find('[data-save="dbName"]').val(),
+                dbName = $(this).parents("tr").eq(1).find('[data-save="dbName"]').val(),
                     table = $(this).parents("tr").eq(1).find('[data-save="table"]').val();
-                str = that[addType](dbName, table)
+                str = that[addType](dbName, table);
             } else if (addType == "propertyRenderYaxis") {
                 var variable = $(this).parents('tr').eq(1).find('[data-save="variable"]').val();
-                str = new newEventsProperty().propertyRenderYaxis(variable, [{
-                    name: "",
-                    split: ""
-                }])
-            } else if (addType == "propertyHandleYaxis") {
-                var variable = $(this).parents('tr').eq(1).find('[data-save="variable"]').val();
-                str = new newEventsProperty().propertyHandleYaxis(variable, [{
-                    field: "",
-                    split: "",
-                    isKey: false,
-                    content: ""
-                }])
+                if ($(this).attr("data-disabled") == "false") {
+                    var tbodyTrLen = $(this).parents("table").eq(0).find("tbody tr").length;
+                    if (tbodyTrLen < 1) {
+                        str = new newEventsProperty().propertyRenderYaxis(variable, [{
+                            name: "",
+                            split: ""
+                        }])
+                    }
+                    $(this).attr("data-disabled", `${tbodyTrLen >= 0 ? true : false}`)
+                } else if ($(this).attr("data-disabled") == 'undefined' || !$(this).attr("data-disabled")) {
+                    str = new newEventsProperty().propertyRenderYaxis(variable, [{
+                        name: "",
+                        split: ""
+                    }])
+                    $tbody.find(".chosen-drop").show();
+                }
 
+                // var variable = $(this).parents('tr').eq(1).find('[data-save="variable"]').val();
+                // str = new newEventsProperty().propertyRenderYaxis(variable, [{
+                //     name: "",
+                //     split: ""
+                // }])
+            } else if (addType == "newbuiltConfigureY") {
+                var parentsTd = $(this).parents('.propertyHandleVariable').find('td').eq(1),
+                    switchType = parentsTd.find('[data-save="switch"]').attr("data-selected"),
+                    variable = switchType == "timeSwitch" ? "" : parentsTd.find('[data-save="variable"]').val(),
+                    options = switchType == "timeSwitch" ? $('[data-type="relativePos"] tr').map(function () {
+                        var $td = $(this).find("td").eq(0),
+                            name = $td.attr('data-text'),
+                            value = $td.attr('data-text')
+                        tdOptions = { name: name, value: value }
+                    }).get().join(',') : "",
+                    newbuiltConfigureVal = new newEventsProperty().newbuiltConfigureVal(variable, [{
+                        content: "",
+                        split: ""
+                    }], options);
+                str = new newEventsProperty().newbuiltConfigureY(variable, [{
+                    field: "",
+                    split: ""
+                }], options);
+                $(this).parents("td").eq(0).next().children("table").children("tbody").append(newbuiltConfigureVal)
+                // } else if (addType == "newbuiltConfigureVal") {
+                //     var variable = $(this).parents('.propertyHandleVariable').find('td').eq(1).find('[data-save="variable"]').val();
+
+                // } else if (addType == "propertyHandleYaxis") {
+                //     var variable = $(this).parents('tr').eq(1).find('[data-save="variable"]').val();
+                //     str = new newEventsProperty().propertyHandleYaxis(variable, [{
+                //         field: "",
+                //         split: "",
+                //         isKey: false,
+                //         content: ""
+                //     }])
             } else if (addType == "renderEvents") {
                 var trIndex = $(this).parents('table').find(".eventsTr:last").attr("index");
                 trIndex = trIndex ? Number(trIndex) + 1 : 0;
@@ -1362,14 +1435,36 @@ NewEventsModal.prototype = {
             } else if (addType == "_renderPropertyQueryTr") {
                 str = new newEventsProperty()._renderPropertyQueryTr([{}])
             } else if (addType == "_renderPropertyHandleBodYTr") {
+                // var $eleSelect = $('.pm-elem3.selected').text(),
+                //     $handleVariableLen = $(this).parents("table").eq(0).find(".propertyHandleVariable").length,
+                //     ename = $eleSelect + "_CA" + NumberHelper.idToName($handleVariableLen, 1);
                 str = new newEventsProperty()._renderPropertyHandleBodYTr([{
                     variable: "",
+                    ename: '',
                     handles: [],
                     Xaxis: "",
                     Yaxis: []
                 }])
             } else if (addType == "_renderPropertyRenderTr") {
                 str = new newEventsProperty()._renderPropertyRenderTr([{}])
+            } else if (addType == "renderExtendColTr") {
+                str = new newEventsProperty().renderExtendColTr();
+            } else if (addType == "renderCacheDatabaseTr") {
+                var $eleSelect = $('.pm-elem3.selected').text(),
+                    $handleVariableLen = $tbody.children("tr").length,
+                    ename = $eleSelect + "_EA" + NumberHelper.idToName($handleVariableLen, 1);
+                str = new newEventsProperty()._renderCacheDatabaseTr([{ variable: "", ename: ename, lastLine: [], fixedFirstLine: [], fixedLastLine: [] }]);
+            } else if (addType == "rendLastLineData") {
+                str = new newEventsProperty()._rendLastLineData([{}]);
+            } else if (addType == "renderFixedFirstLineData") {
+                $tbody = $tbody.find("td").eq(1).find("table tbody");
+                var $tbodyTrLen = $tbody.find("tr").length;
+                str = new newEventsProperty()._renderFixedFirstLineData([{ sortLine: 0, name: "", value: "" }], $tbodyTrLen);
+            } else if (addType == "renderFixedLastLineData") {
+                var $tbodyTrLen = $tbody.find("tr").length;
+                var tdNum = $tbodyTrLen ? $tbodyTrLen + 1 : 1;
+                var ename = "CAA" + NumberHelper.idToName($tbodyTrLen ? $tbodyTrLen : 0, 1);
+                str = new newEventsProperty()._renderFixedLastLineData([{ sortLine: tdNum, name: "", value: ename }]);
             } else if (addType == "renderTriggerConditionTbody") {
                 $(this).parents('td').css("width", 'auto');
                 str = that[addType]();
@@ -1377,8 +1472,50 @@ NewEventsModal.prototype = {
                 str = that[addType]();
             }
             $tbody.append(str)
-            that.bindChosen()
-            new newEventsProperty().bindEvents()
+            that.bindChosen();
+            // new newEventsProperty().bindEvents()
+            if (addType == "propertyRenderYaxis") {
+                if ($(this).attr("data-disabled") == "true") {
+                    var $tdPrev = $(this).parents("td").eq(0).prev("td"),
+                        prevSelect = $tdPrev.find("select[data-save='XAxis']"),
+                        prevSelectVal = prevSelect.val(),
+                        prevSelectAttr = prevSelect.find("option:selected").attr("data-text"),
+                        prevSelectIdx = prevSelect.find("option:selected").index();
+                    $parentTable = $(this).parents("table").eq(0);
+                    prevSelect.attr("disabled", true);
+                    $parentTable.find(`.active-result[data-option-array-index="${prevSelectIdx}"]`).addClass("result-selected")
+                    $parentTable.find("[data-save='headName']").val(prevSelectAttr);
+                    // $parentTable.find(".chosen-single>span").text(prevSelectAttr + '(' + prevSelectVal + ')');
+                    $parentTable.find(".chosen-single>span").text(prevSelectAttr).attr("title", '(' + prevSelectVal + ')');
+                    $parentTable.find(".chosen-drop").hide();
+                }
+            }
+            if (addType == "renderCopySendCondition") {
+                if (!dbName && !table) {
+                    var $field = $(this).parents("table").eq(0).find('[data-change="field"]'),
+                        queryValue = $(this).parents("td").eq(0).prev("td").find("select").attr("data-selected"),
+                        $html = '',
+                        data = [];
+                    GLOBAL_PROPERTY.BODY && GLOBAL_PROPERTY.BODY.customVariable && GLOBAL_PROPERTY.BODY.customVariable.forEach(function (item, index) {
+                        if (item.key == queryValue) {
+                            if (item.fields) {
+                                data = item.fields;
+                                // $html = that.renderCopySendSelect("fieldSplit", '', '', '', "请选择", null, data);
+                                $html = that.renderCopySendSelect("field", '', '', '', "请选择", null, data);
+                            } else {
+                                data = item.handleResult;
+                                $html = that.renderQuerySelect('field', data, '请选择', null)
+                            }
+                        }
+                    })
+                    // var $html = that.renderQuerySelect('field', data, '请选择', null)
+                    $field.parent("td").empty().append($html);
+                    that.bindChosen();
+                }
+            }
+            if (addType == "renderEvents") {
+                $(".events_tbbody > tr").children("td:nth-child(3)").css("width", '4%');
+            }
         })
         //移除一行
         that.$modal.on("click" + that.NAME_SPACE, ".del", function () {
@@ -1387,7 +1524,28 @@ NewEventsModal.prototype = {
                 $trIdx = Number($eventsTrs.attr("index")),
                 trKey = NumberHelper.idToName($trIdx, 1),
                 selectPmText = $('.pm-elem3.selected').text(),
-                resTrsArr = [];
+                resTrsArr = [],
+                $add = $("span[data-add='propertyRenderYaxis']");
+
+            if ($add.attr("data-disabled") == "true") {
+                $add.attr("data-disabled", `${$tr.siblings().length > 0 ? true : false}`);
+            }
+            if ($(this).attr("data-attr") == "handle") {
+                var thisParentTrPrevLen = $(this).parents("tr").eq(0).prevAll().length;
+                $(this).parents("td").eq(1).next("td").children("table").children("tbody").children('tr').eq(thisParentTrPrevLen).remove();
+            }
+            var $trCacheDatabase = $(this).parents("tr").eq(2).attr("class");
+            if ($trCacheDatabase = "cacheDatabaseTr") {
+                var $thisAttr = $(this).attr("data-attr"),
+                    num = $thisAttr == "fixedFirstLineData" ? "AAA" : $thisAttr == "fixedLastLineData" ? "CAA" : "";
+                var sortLine = $tr.find('[data-save="sortLine"]').val();
+                $tr.nextAll().each((idx, ele) => {
+                    var eleSortLine = Number(sortLine) + idx,
+                        eleValue = num + NumberHelper.idToName(eleSortLine - 1, 1);
+                    $(ele).find('[data-save="sortLine"]').val(eleSortLine);
+                    $(ele).find('[data-save="value"]').val(eleValue);
+                })
+            }
             if (!$tr.hasClass("eventsTr")) {
                 var $div = $(this).parents(".condition"),
                     tipsNum = "";
@@ -1428,6 +1586,7 @@ NewEventsModal.prototype = {
             if ($(this).parents('.triggerConditionTr').length != 0) {
                 $(this).parents('td').css("width", '16%');
             }
+
             $tr.remove();
         })
         //触发的类型变化时
@@ -1463,7 +1622,7 @@ NewEventsModal.prototype = {
                 var maxNum = 0;
                 checkArr.push(value);
                 maxNum = checkArr.findIndex(ele => ele === value);
-                $thisParent.append(`<span class="checked-num" data-value="${value}">${maxNum + 1}</span>`);
+                $thisParent.append(`<span class="checked-num" data-value="${value}" > ${maxNum + 1}</span> `);
             } else {
                 var findIdx = checkArr.findIndex(ele => ele === value),
                     parentSib = $thisParent.siblings();
@@ -1489,14 +1648,14 @@ NewEventsModal.prototype = {
             $this.parents('tr').attr('data-check', JSON.stringify(checkArr));
 
             let arr = ["save", "upload", "login", "checkAll", "cancelAll", "changeProperty", "copySend", "notify", "saveHTML",
-                "linkHtml", "nextProcess", "executeFn", "importExcel", "importDb", "keySave", "deleteRow", "propertyData", "propertyQuery", "propertyHandle", "propertyRender", "extendCol", "computerPage"
+                "linkHtml", "nextProcess", "executeFn", "importExcel", "importDb", "keySave", "deleteRow", "propertyData", "propertyQuery", "propertyHandle", "propertyRender", "extendCol", "computerPage", "cacheDatabase"
             ];
 
             if (!arr.includes(value)) {
                 return;
             }
 
-            $target = $this.parents("tr").find(`.${value}`);
+            $target = $this.parents("tr").find(`.${value} `);
             check ? $target.show() : $target.hide()
         })
         that.$modal.on("change" + that.NAME_SPACE, "[data-change='dbName']", function () {
@@ -1523,8 +1682,30 @@ NewEventsModal.prototype = {
 
             $field.parent("td").empty().append($html)
             that.bindChosen()
-
         })
+
+        //填充属性查询--查询条件
+        that.$modal.on("change" + that.NAME_SPACE, ".propertyQuery [data-save='variable']", function () {
+            let value = $(this).val(),
+                $field = $(this).parents("tr").eq(0).find('[data-change="field"]'),
+                data = [],
+                $html = '';
+            GLOBAL_PROPERTY.BODY && GLOBAL_PROPERTY.BODY.customVariable && GLOBAL_PROPERTY.BODY.customVariable.forEach(function (item, index) {
+                if (item.key == value) {
+                    if (item.fields) {
+                        data = item.fields;
+                        // $html = that.renderCopySendSelect("fieldSplit", '', '', '', "请选择", null, data);
+                        $html = that.renderCopySendSelect("field", '', '', '', "请选择", null, data);
+                    } else {
+                        data = item.handleResult;
+                        $html = that.renderQuerySelect('field', data, '请选择', null)
+                    }
+                }
+            })
+            $field.parent("td").empty().append($html)
+            that.bindChosen()
+        })
+
         that.$modal.on("change" + that.NAME_SPACE, ".changeFieldSplit [data-change='field']", function () {
             let $tr = $(this).parents("tr").eq(0),
                 $tr1 = $(this).parents("tr").eq(1),
@@ -1540,7 +1721,6 @@ NewEventsModal.prototype = {
         })
         //批量设置抄送
         that.$modal.on("click" + that.NAME_SPACE, '.autoCopySend', function () {
-
             let $tr = $(this).parents("tr").eq(1),
                 $table = $(this).parents("table").eq(0),
                 dbName = $tr.find('[data-change="dbName"]').val(),
@@ -1665,15 +1845,15 @@ NewEventsModal.prototype = {
             var $nextItem = $(this).parent().next('div'),
                 $modalHeight = $(this).parents(".modal").height();
             $nextItem.toggle();
-            $(this).html(`${$nextItem.is(":hidden") ? "显示" : "隐藏"}`);
-            $(this).parents().find(".modal-body").css("max-height", `${$nextItem.is(":hidden") ? ($modalHeight - 80) + "px" : "500px"}`)
+            $(this).html(`${$nextItem.is(":hidden") ? "显示" : "隐藏"} `);
+            $(this).parents().find(".modal-body").css("max-height", `${$nextItem.is(":hidden") ? ($modalHeight - 80) + "px" : "500px"} `)
         })
         that.$modal.on("click" + that.NAME_SPACE, '.control-size', function () {
             if ($(this).attr("data-size") == "reductionSize") {
                 var $modal = $(this).parents(".modal"),
                     $wdith = $modal.width(),
                     $heigt = $modal.height();
-                $(this).parents(".modal-dialog.w1800px").css({ "width": ($wdith - 30) + 'px', "height": ($heigt) + 'px' });
+                $(this).parents(".modal-dialog.w1800px").css({ "width": ($wdith - 30) + 'px', "height": ($heigt + 50) + 'px' });
                 $(this).attr("data-size", "maximize").find(".control-img").prop("src", "../images/maximize.png");
             } else {
                 $(this).parents(".modal-dialog.w1800px").css({ "width": '1808px', "height": '1037px' });
@@ -1693,8 +1873,20 @@ NewEventsModal.prototype = {
             // $("." + target).val($this.val()).focus().trigger("blur");
             // $this.val("#FFFFFF");
         })
-
-
+        that.$modal.on("click" + that.NAME_SPACE, '.toggle-dot', function () {
+            var that = $(this),
+                thisIdx = that.parent("th").prevAll().length;
+            thisAttrName = that.attr("data-name");
+            that.toggleClass('active');
+            if (thisAttrName !== "condition") {
+                var $targetTable = that.parents("table").eq(0).find('tbody tr').eq(0).children("td").eq(thisIdx).find('table');
+                that.hasClass("active") ? $targetTable.css("display", "none").parent().css("width", "105px") : $targetTable.css("display", "block").parent().css("width", "initial");
+            } else {
+                that.parents("table").eq(0).children("tbody").children("tr").each((idx, tr) => {
+                    that.hasClass("active") ? $(tr).children('td').eq(thisIdx).css("width", '4%').children().hide() : $(tr).children('td').eq(thisIdx).css("width", '16%').children().show();
+                })
+            }
+        })
     },
     execute: function () {
         let that = this

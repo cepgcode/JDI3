@@ -11,7 +11,7 @@ function BaseModal($modal, $element) {
     this.$modalBody = $modal.find(".modal-body"); //获取模态框的modal-body
     this.$element = $element || null; //如果$element有值就用改值否则为空
 
-    this.basicEvents = function (isJSON, openFn, saveFn, clearFn) { //绑定事件
+    this.basicEvents = function (isJSON, openFn, saveFn, clearFn, sureFn) { //绑定事件
         isJSON = !!isJSON; //isJSon转换为布尔值
         var that = this;
 
@@ -68,5 +68,6 @@ function BaseModal($modal, $element) {
                 }
             });
         }
+
     };
 }

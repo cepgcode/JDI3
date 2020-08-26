@@ -1,6 +1,6 @@
 $.cajax = function (options, isPrompt) {
     options = options || {};
-    noloading = !! options.noloading
+    noloading = !!options.noloading
 
     delete options.noloading
 
@@ -23,9 +23,9 @@ $.cajax = function (options, isPrompt) {
         }
     };
 
-    var ip =  jdi.fileApi.getConfigUrl().serverUrl,
-    // var ip = 'http://172.18.152.111'
-    oUrl = options.url;
+    var ip = jdi.fileApi.getConfigUrl().serverUrl,
+        // var ip = 'http://172.18.152.111'
+        oUrl = options.url;
     nUrl = ip + oUrl;
     options.url = nUrl;
     options.headers = {

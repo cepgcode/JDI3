@@ -90,8 +90,19 @@ SetDbDesignerModal.prototype = {
         that._setDefaultTableName();
         that.tableName = that._getTableValue()
         var db = Object.keys(that.dbList);
-        that.initTable(db[0])
-        that.initTableHeader(db[0])
+        var dbName = db[0];
+        // var dbName = that.dbList.find(ele => {
+        for (var ele in that.dbList) {
+            var eleKeys = Object.keys(that.dbList[ele]);
+            if (eleKeys.includes(that.tableName)) {
+                dbName = ele;
+            }
+        }
+        console.log(dbName);
+        that.initTable(dbName)
+        that.initTableHeader(dbName)
+        // that.initTable(db[0])
+        // that.initTableHeader(db[0])
     },
     initTableHeader: function (dbName) {
         var that = this;
@@ -188,63 +199,63 @@ SetDbDesignerModal.prototype = {
             disabled: false,
             $elems: $("#workspace").find("input"),
             thead: [{
-                    name: "id",
-                    text: "编号",
-                    key: "id",
-                    template: function (value) {
-                        return '<input class="form-control" data-key="id" type="text" value="' + value + '" readonly>';
-                    }
-                },
-                {
-                    name: "cname",
-                    text: "中文名",
-                    key: "cname",
-                    template: function (value) {
-                        return '<input class="form-control" data-key="cname" type="text" value="' + value + '" readonly>';
-                    }
-                },
-                {
-                    name: "type",
-                    text: "数据类型",
-                    key: "type",
-                    template: function (value) {
-                        return `<select class="form-control" data-key="type">
-                                    <option value="string" ${value=="string"?"selected":""}>字符型</option>
-                                    <option value="int" ${value=="int"?"selected":""}>整型</option>
-                                    <option value="float" ${value=="float"?"selected":""}>浮点型</option>
-                                    <option value="time" ${value=="time"?"selected":""}>日期型</option>
-                                    <option value="datetime" ${value=="datetime"?"selected":""}>时间型</option>
-                                </select>`
-                    }
-                },
-                {
-                    name: "maxlength",
-                    text: "数据长度",
-                    key: "maxlength",
-                    template: function (value) {
-                        return `<input class="form-control"  data-key="maxlength" type="text" value="${value||50}"></input>`
-                    }
-                },
-                {
-                    name: "isSave",
-                    text: "是否入库",
-                    key: "isSave",
-                    group: true,
-                    hasCheckbox: true,
-                    template: function (value) {
-                        var isChecked = !!value ? " checked" : "";
-                        return '<input data-key="isSave" type="checkbox"' + isChecked + '>';
-                    }
-                },
-                { //新增加
-                    name: "fieldSplit",
-                    text: "字段分段",
-                    key: "fieldSplit",
-                    group: true,
-                    template: function (value) {
-                        return `<input class="form-control" data-key="fieldSplit"  type="text" value=${value>0?value:""}>`
-                    }
+                name: "id",
+                text: "编号",
+                key: "id",
+                template: function (value) {
+                    return '<input class="form-control" data-key="id" type="text" value="' + value + '" readonly>';
                 }
+            },
+            {
+                name: "cname",
+                text: "中文名",
+                key: "cname",
+                template: function (value) {
+                    return '<input class="form-control" data-key="cname" type="text" value="' + value + '" readonly>';
+                }
+            },
+            {
+                name: "type",
+                text: "数据类型",
+                key: "type",
+                template: function (value) {
+                    return `<select class="form-control" data-key="type">
+                                    <option value="string" ${value == "string" ? "selected" : ""}>字符型</option>
+                                    <option value="int" ${value == "int" ? "selected" : ""}>整型</option>
+                                    <option value="float" ${value == "float" ? "selected" : ""}>浮点型</option>
+                                    <option value="time" ${value == "time" ? "selected" : ""}>日期型</option>
+                                    <option value="datetime" ${value == "datetime" ? "selected" : ""}>时间型</option>
+                                </select>`
+                }
+            },
+            {
+                name: "maxlength",
+                text: "数据长度",
+                key: "maxlength",
+                template: function (value) {
+                    return `<input class="form-control"  data-key="maxlength" type="text" value="${value || 50}"></input>`
+                }
+            },
+            {
+                name: "isSave",
+                text: "是否入库",
+                key: "isSave",
+                group: true,
+                hasCheckbox: true,
+                template: function (value) {
+                    var isChecked = !!value ? " checked" : "";
+                    return '<input data-key="isSave" type="checkbox"' + isChecked + '>';
+                }
+            },
+            { //新增加
+                name: "fieldSplit",
+                text: "字段分段",
+                key: "fieldSplit",
+                group: true,
+                template: function (value) {
+                    return `<input class="form-control" data-key="fieldSplit"  type="text" value=${value > 0 ? value : ""}>`
+                }
+            }
             ],
             getProperty: new Property().getProperty,
             dbList: that.dbList,
